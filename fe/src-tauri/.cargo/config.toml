@@ -1,0 +1,10 @@
+[http]
+timeout = 120
+multiplexing = false
+check-revoke = false
+
+[source.crates-io]
+replace-with = "sjtu"
+
+[source.sjtu]
+registry = "sparse+https://mirrors.sjtug.sjtu.edu.cn/crates.io-index/"

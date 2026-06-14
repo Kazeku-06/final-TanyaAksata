@@ -6,6 +6,10 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+export async function generateStaticParams() {
+  return [{ id: "1" }];
+}
+
 export default async function QuestionDetailPage({ params }: PageProps) {
   const { id } = await params;
   return (

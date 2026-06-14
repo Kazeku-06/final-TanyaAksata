@@ -4,8 +4,9 @@ import { usePost } from "@/hooks/usePosts";
 import Spinner from "@/components/ui/Spinner";
 import { timeAgo } from "@/lib/utils";
 import Avatar from "@/components/ui/Avatar";
-import ReportButton from "./ReportButton"; // Sesuaikan path ini dengan struktur folder Anda
+import ReportButton from "./ReportButton"
 import { CheckCircle } from "lucide-react";
+import Link from "next/link";
 
 interface PostDetailProps {
   postId: string;
