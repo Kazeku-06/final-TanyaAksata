@@ -2,13 +2,21 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Providers from "@/components/Providers";
 
+import type { Viewport } from "next";
+
 export const metadata: Metadata = {
   title: {
     default: "TanyaAksata",
     template: "%s | TanyaAksata",
   },
   description: "Platform tanya jawab komunitas — tempat bertanya, berbagi, dan berkembang bersama.",
+  manifest: "/manifest.json",
 };
+
+export const viewport: Viewport = {
+  themeColor: "#1e293b",
+};
+
 
 export default function RootLayout({
   children,

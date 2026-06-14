@@ -1,11 +1,13 @@
 import type { NextConfig } from "next";
 import { PHASE_PRODUCTION_BUILD } from "next/constants";
+import withPWAInit from "@ducanh2912/next-pwa";
 
 const nextConfig = (phase: string): NextConfig => {
   const isExport = phase === PHASE_PRODUCTION_BUILD;
 
-  return {
+  const config: NextConfig = {
     ...(isExport ? { output: 'export' } : {}),
+    trailingSlash: true,
     allowedDevOrigins: ['103.6.201.118'],
     images: {
       unoptimized: true,
@@ -29,6 +31,20 @@ const nextConfig = (phase: string): NextConfig => {
       ],
     },
   };
+
+  const withPWA = withPWAInit({
+    dest: "public",
+    cacheOnFrontEndNav: true,
+    aggressiveFrontEndNavCaching: true,
+    reloadOnOnline: true,
+    disable: process.env.NODE_ENV === "development",
+    workboxOptions: {
+      disableDevLogs: true,
+    },
+  });
+
+  return withPWA(config);
 };
 
 export default nextConfig;
+
