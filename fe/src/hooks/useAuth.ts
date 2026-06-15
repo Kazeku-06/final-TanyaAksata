@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import Cookies from "js-cookie";
+import { getToken, setToken, removeToken } from "@/lib/token";
 import api from "@/lib/axios";
 import type { User, LoginPayload, RegisterPayload, AuthData } from "@/types";
 
@@ -15,7 +15,7 @@ export function useMe() {
   return useQuery({
     queryKey: ["me"],
     queryFn: fetchMe,
-    enabled: !!Cookies.get("auth_token"),
+    enabled: !!getToken(),
     retry: false,
   });
 }
@@ -32,7 +32,7 @@ export function useLogin() {
       return data.data;
     },
     onSuccess: (data) => {
-      Cookies.set("auth_token", data.token, { expires: 7 });
+      setToken(data.token);
       qc.setQueryData(["me"], data.user);
     },
   });
@@ -50,7 +50,7 @@ export function useRegister() {
       return data.data;
     },
     onSuccess: (data) => {
-      Cookies.set("auth_token", data.token, { expires: 7 });
+      setToken(data.token);
       qc.setQueryData(["me"], data.user);
     },
   });
@@ -64,7 +64,7 @@ export function useLogout() {
       await api.post("/auth/logout");
     },
     onSettled: () => {
-      Cookies.remove("auth_token");
+      removeToken();
       // Hanya hapus data yang user-specific, bukan semua cache.
       // Posts, categories, dll. adalah data publik — tetap di cache.
       qc.removeQueries({ queryKey: ["me"] });

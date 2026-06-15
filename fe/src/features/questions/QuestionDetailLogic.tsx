@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { usePost, useVotePost, useLikePost, useBookmarkPost, useDeletePost } from "@/hooks/usePosts";
 import { useComments, useAcceptAnswer } from "@/hooks/useComments";
 import { useMe } from "@/hooks/useAuth";
@@ -15,17 +15,28 @@ interface QuestionDetailLogicProps {
 export default function QuestionDetailLogic({ postId }: QuestionDetailLogicProps) {
   const router = useRouter();
 
+  // Extract ID directly from raw window.location.pathname to bypass pre-baked Next.js static params
+  const [id, setId] = useState(postId);
+
+  useEffect(() => {
+    const pathParts = window.location.pathname.split("/").filter(Boolean);
+    const qIndex = pathParts.indexOf("questions");
+    if (qIndex !== -1 && pathParts[qIndex + 1]) {
+      setId(pathParts[qIndex + 1]);
+    }
+  }, [postId]);
+
   // ── Data fetching ───────────────────────────────────────────
-  const { data: post, isLoading: isLoadingPost, isError: isPostError } = usePost(postId);
-  const { data: comments, isLoading: isLoadingComments } = useComments(postId);
+  const { data: post, isLoading: isLoadingPost, isError: isPostError } = usePost(id);
+  const { data: comments, isLoading: isLoadingComments } = useComments(id);
   const { data: me } = useMe();
 
   // ── Post mutations ──────────────────────────────────────────
-  const { mutate: votePost }     = useVotePost(postId);
-  const { mutate: likePost }     = useLikePost(postId);
-  const { mutate: bookmarkPost } = useBookmarkPost(postId);
+  const { mutate: votePost }     = useVotePost(id);
+  const { mutate: likePost }     = useLikePost(id);
+  const { mutate: bookmarkPost } = useBookmarkPost(id);
   const { mutate: deletePost, isPending: isDeleting } = useDeletePost();
-  const { mutate: acceptAnswer } = useAcceptAnswer(postId);
+  const { mutate: acceptAnswer } = useAcceptAnswer(id);
 
   // ── Permission checks ───────────────────────────────────────
   const isPostOwner = !!me && !!post && me.id === post.user_id;
@@ -34,7 +45,7 @@ export default function QuestionDetailLogic({ postId }: QuestionDetailLogicProps
   );
   const canEdit = isPostOwner || canModerate;
 
-  const { data: postHistory } = usePostEditHistory(canModerate ? postId : "");
+  const { data: postHistory } = usePostEditHistory(canModerate ? id : "");
 
   // ── Local state ─────────────────────────────────────────────
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
@@ -57,7 +68,7 @@ export default function QuestionDetailLogic({ postId }: QuestionDetailLogicProps
 
   function handleDeletePost() {
     if (!confirm("Yakin ingin menghapus pertanyaan ini?")) return;
-    deletePost(postId, {
+    deletePost(id, {
       onSuccess: () => router.replace("/"),
     });
   }
@@ -80,7 +91,7 @@ export default function QuestionDetailLogic({ postId }: QuestionDetailLogicProps
       canModerate={canModerate}
       postHistory={postHistory ?? []}
       replyingToId={replyingToId}
-      postId={postId}
+      postId={id}
       onVotePost={handleVotePost}
       onLikePost={handleLikePost}
       onBookmark={handleBookmark}

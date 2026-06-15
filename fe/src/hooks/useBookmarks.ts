@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import type { Bookmark, ApiResponse, PaginatedData } from "@/types";
-import Cookies from "js-cookie";
+import { hasToken } from "@/lib/token";
 
 export function useBookmarks(page = 1) {
   return useQuery({
@@ -15,7 +15,7 @@ export function useBookmarks(page = 1) {
       );
       return data.data;
     },
-    enabled: !!Cookies.get("auth_token"),
+    enabled: hasToken(),
   });
 }
 
@@ -36,7 +36,7 @@ export function useMyBookmarkIds() {
       }
       return map;
     },
-    enabled: !!Cookies.get("auth_token"),
+    enabled: hasToken(),
     staleTime: 1000 * 30,
   });
 }

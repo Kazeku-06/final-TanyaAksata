@@ -1,5 +1,5 @@
 import axios from "axios";
-import Cookies from "js-cookie";
+import { getToken, removeToken, hasToken } from "./token";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -9,9 +9,9 @@ const api = axios.create({
   },
 });
 
-// Request interceptor — attach token from cookie
+// Request interceptor — attach token from token utility
 api.interceptors.request.use((config) => {
-  const token = Cookies.get("auth_token");
+  const token = getToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -25,8 +25,8 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       // Hanya redirect ke login jika ada token (sesi expired),
       // bukan saat request publik yang memang tidak butuh auth.
-      const hadToken = !!Cookies.get("auth_token");
-      Cookies.remove("auth_token");
+      const hadToken = hasToken();
+      removeToken();
 
       if (hadToken && typeof window !== "undefined") {
         const pathname = window.location.pathname;

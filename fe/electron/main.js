@@ -55,7 +55,19 @@ app.whenReady().then(() => {
       return net.fetch('file://' + indexPath);
     }
 
-    // 3. SPA Routing Fallback: Let Next.js client router handle navigation
+    // 3. Dynamic routes resolution for static export (serve the id=1 template as fallback)
+    if (pathname.startsWith('/questions/')) {
+      const parts = pathname.split('/').filter(Boolean);
+      if (parts.includes('edit')) {
+        return net.fetch('file://' + path.join(outDir, 'questions/1/edit/index.html'));
+      }
+      return net.fetch('file://' + path.join(outDir, 'questions/1/index.html'));
+    }
+    if (pathname.startsWith('/users/')) {
+      return net.fetch('file://' + path.join(outDir, 'users/1/index.html'));
+    }
+
+    // 4. SPA Routing Fallback: Let Next.js client router handle navigation
     return net.fetch('file://' + path.join(outDir, 'index.html'));
   });
 

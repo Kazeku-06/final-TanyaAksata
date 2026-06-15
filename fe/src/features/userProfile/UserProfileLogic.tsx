@@ -3,7 +3,8 @@
 import { usePublicProfile, useFollow, useUnfollow, useIsFollowing } from "@/hooks/useProfile";
 import { useUserPosts } from "@/hooks/usePosts";
 import { useMe } from "@/hooks/useAuth";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import UserProfileView from "./UserProfileView";
 
 interface UserProfileLogicProps {
@@ -13,18 +14,29 @@ interface UserProfileLogicProps {
 export default function UserProfileLogic({ userId }: UserProfileLogicProps) {
   const [postsPage, setPostsPage] = useState(1);
 
+  // Extract ID directly from raw window.location.pathname to bypass pre-baked Next.js static params
+  const [id, setId] = useState(userId);
+
+  useEffect(() => {
+    const pathParts = window.location.pathname.split("/").filter(Boolean);
+    const uIndex = pathParts.indexOf("users");
+    if (uIndex !== -1 && pathParts[uIndex + 1]) {
+      setId(pathParts[uIndex + 1]);
+    }
+  }, [userId]);
+
   // Data fetching
-  const { data: user, isLoading: isLoadingUser, isError: isUserError } = usePublicProfile(userId);
-  const { data: posts, isLoading: isLoadingPosts } = useUserPosts(userId, postsPage);
+  const { data: user, isLoading: isLoadingUser, isError: isUserError } = usePublicProfile(id);
+  const { data: posts, isLoading: isLoadingPosts } = useUserPosts(id, postsPage);
   const { data: me } = useMe();
-  const { data: isFollowing, isLoading: isCheckingFollow } = useIsFollowing(userId);
+  const { data: isFollowing, isLoading: isCheckingFollow } = useIsFollowing(id);
 
   // Mutations
-  const { mutate: follow, isPending: isFollowingPending } = useFollow(userId);
-  const { mutate: unfollow, isPending: isUnfollowingPending } = useUnfollow(userId);
+  const { mutate: follow, isPending: isFollowingPending } = useFollow(id);
+  const { mutate: unfollow, isPending: isUnfollowingPending } = useUnfollow(id);
 
   // Derived state
-  const isSelf = !!me && me.id === userId;
+  const isSelf = !!me && me.id === id;
   const isLoggedIn = !!me;
 
   function handleFollowToggle() {

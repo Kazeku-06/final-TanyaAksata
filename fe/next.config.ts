@@ -9,6 +9,7 @@ const nextConfig = (phase: string): NextConfig => {
     ...(isExport ? { output: 'export' } : {}),
     trailingSlash: true,
     allowedDevOrigins: ['103.6.201.118'],
+    turbopack: {},
     images: {
       unoptimized: true,
       remotePatterns: [

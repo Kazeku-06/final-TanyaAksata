@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import type { User, Badge, ApiResponse, UpdateProfilePayload, PaginatedData } from "@/types";
+import { hasToken } from "@/lib/token";
 
 // ── Public profile ──────────────────────────────────────────
 export function usePublicProfile(userId: string) {
@@ -36,6 +37,7 @@ export function useMyBadges() {
       const { data } = await api.get<ApiResponse<Badge[]>>("/my-badges");
       return data.data;
     },
+    enabled: hasToken(),
   });
 }
 
@@ -52,13 +54,9 @@ export function useUpdateProfile() {
           if (v !== undefined && v !== null) form.append(k, v as string | Blob);
         }
         const { data } = await api.post<ApiResponse<User>>("/profile", form, {
-          transformRequest: [
-            (data, headers) => {
-              delete headers["Content-Type"];
-              delete headers.post?.["Content-Type"];
-              return data;
-            },
-          ],
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         });
         return data.data;
       }
@@ -120,6 +118,7 @@ export function useMyFollowing() {
       const { data } = await api.get<ApiResponse<User[]>>("/users/me/following");
       return data.data;
     },
+    enabled: hasToken(),
   });
 }
 
@@ -130,6 +129,7 @@ export function useMyFollowers() {
       const { data } = await api.get<ApiResponse<User[]>>("/users/me/followers");
       return data.data;
     },
+    enabled: hasToken(),
   });
 }
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { usePost, useUpdatePost } from "@/hooks/usePosts";
 import { useCategories } from "@/hooks/useCategories";
 import { useEditForm } from "./useEditForm";
@@ -13,8 +14,20 @@ interface EditLogicProps {
 
 export default function EditLogic({ postId }: EditLogicProps) {
   const router = useRouter();
-  const { data: post, isLoading: isLoadingPost, isError: isPostError } = usePost(postId);
-  const { mutate: updatePost, isPending } = useUpdatePost(postId);
+
+  // Extract ID directly from raw window.location.pathname to bypass pre-baked Next.js static params
+  const [id, setId] = useState(postId);
+
+  useEffect(() => {
+    const pathParts = window.location.pathname.split("/").filter(Boolean);
+    const qIndex = pathParts.indexOf("questions");
+    if (qIndex !== -1 && pathParts[qIndex + 1]) {
+      setId(pathParts[qIndex + 1]);
+    }
+  }, [postId]);
+
+  const { data: post, isLoading: isLoadingPost, isError: isPostError } = usePost(id);
+  const { mutate: updatePost, isPending } = useUpdatePost(id);
   const { data: categories, isLoading: isLoadingCategories } = useCategories(true);
 
   const {
@@ -40,7 +53,7 @@ export default function EditLogic({ postId }: EditLogicProps) {
       },
       {
         onSuccess: () => {
-          router.push(`/questions/${postId}`);
+          router.push(`/questions/${id}`);
         },
         onError: (err: unknown) => {
           const axiosErr = err as {

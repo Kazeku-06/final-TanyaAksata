@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import type { Notification, ApiResponse, PaginatedData } from "@/types";
-import Cookies from "js-cookie";
+import { hasToken } from "@/lib/token";
 
 export function useNotifications(page = 1) {
   return useQuery({
@@ -15,7 +15,7 @@ export function useNotifications(page = 1) {
       );
       return data.data;
     },
-    enabled: !!Cookies.get("auth_token"),
+    enabled: hasToken(),
   });
 }
 
@@ -54,7 +54,7 @@ export function useUnreadCount() {
       // Coba dari total field dulu, fallback ke filter manual
       return data.data.total ?? data.data.data.filter((n) => !n.is_read).length;
     },
-    enabled: !!Cookies.get("auth_token"),
+    enabled: hasToken(),
     refetchInterval: 30_000,
   });
 }
